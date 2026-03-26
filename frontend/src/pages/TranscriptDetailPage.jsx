@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import DecisionsActionsPanel from '../components/DecisionsActionsPanel';
-import SentimentDashboard from '../components/SentimentDashboard';
-import ChatPanel from '../components/ChatPanel';
 
-function TranscriptDetailPage() {
-    const { id } = useParams();
+function TranscriptDetailPage({ id, onBack }) {
     const [transcript, setTranscript] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -33,7 +28,7 @@ function TranscriptDetailPage() {
 
     return (
         <div className="transcript-detail-page">
-            <Link to="/" className="btn" style={{ marginBottom: '2rem' }}>&larr; Back to Dashboard</Link>
+            <button className="btn" style={{ marginBottom: '2rem', background: 'transparent', color: 'var(--text-main)', border: 'none', cursor: 'pointer', padding: 0 }} onClick={onBack}>&larr; Back to Dashboard</button>
             
             <div className="flex-between" style={{ marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
                 <div>
@@ -48,31 +43,8 @@ function TranscriptDetailPage() {
                 </div>
             </div>
 
-            {/* Layout Grid: Left column for Main Content, Right Column for Chat */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start' }}>
-                {/* Main Content Area */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-                    <section>
-                        <DecisionsActionsPanel 
-                            transcriptId={transcript.id} 
-                            extractions={transcript.extractions} 
-                            onRefresh={fetchTranscript} 
-                        />
-                    </section>
-
-                    <section>
-                        <SentimentDashboard 
-                            transcriptId={transcript.id} 
-                            sentiment={transcript.sentiment} 
-                            onRefresh={fetchTranscript} 
-                        />
-                    </section>
-                </div>
-
-                {/* Cross-Meeting Chat Sidebar */}
-                <div style={{ position: 'sticky', top: '2rem' }}>
-                    <ChatPanel transcriptId={transcript.id} />
-                </div>
+            <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', color: 'var(--text-main)' }}>
+                {transcript.content || 'No transcript content available.'}
             </div>
         </div>
     );

@@ -1,12 +1,11 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-function UploadDropzone() {
+function UploadDropzone({ onUploadSuccess }) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [statusText, setStatusText] = useState('');
   const fileInputRef = useRef(null);
-  const navigate = useNavigate();
 
   const validateFiles = (files) => {
     let valid = true;
@@ -31,6 +30,7 @@ function UploadDropzone() {
     }
 
     setUploading(true);
+    setStatusText('Uploading files...');
     const formData = new FormData();
     fileArray.forEach(f => formData.append('files', f));
 
@@ -41,17 +41,25 @@ function UploadDropzone() {
       });
       
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Upload failed');
+        let errorMsg = 'Upload failed';
+        try {
+          const errorData = await res.json();
+          errorMsg = errorData.message || errorMsg;
+        } catch (e) {
+          errorMsg = `Server returned ${res.status}. Please make sure you restarted your backend server!`;
+        }
+        throw new Error(errorMsg);
       }
 
-      await res.json();
-      navigate('/');
+      const data = await res.json();
+      
+      if (onUploadSuccess) onUploadSuccess();
     } catch (err) {
       console.error(err);
       setError(err.message);
     } finally {
       setUploading(false);
+      setStatusText('');
     }
   };
 
@@ -73,7 +81,7 @@ function UploadDropzone() {
   return (
     <div className="upload-dropzone" style={{ marginBottom: '2rem' }}>
       <div 
-        onClick={() => fileInputRef.current.click()}
+        onClick={() => !uploading && fileInputRef.current.click()}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
@@ -83,8 +91,9 @@ function UploadDropzone() {
           padding: '4rem',
           textAlign: 'center',
           background: isDragging ? 'rgba(88, 166, 255, 0.1)' : 'var(--surface-color)',
-          cursor: 'pointer',
-          transition: 'var(--transition)'
+          cursor: uploading ? 'wait' : 'pointer',
+          transition: 'var(--transition)',
+          opacity: uploading ? 0.7 : 1
         }}
       >
         <div style={{ marginBottom: '1.5rem' }}>
@@ -106,7 +115,7 @@ function UploadDropzone() {
           onChange={(e) => handleFiles(e.target.files)}
         />
         
-        {uploading && <p style={{ color: 'var(--primary-color)', marginTop: '2rem', fontWeight: '500' }}>Uploading and Processing...</p>}
+        {uploading && <p style={{ color: 'var(--primary-color)', marginTop: '2rem', fontWeight: '600' }}>{statusText}</p>}
       </div>
       
       {error && <div style={{ color: 'var(--danger-color)', marginTop: '1rem', padding: '1rem', background: 'rgba(218,54,51,0.1)', borderRadius: '8px' }}>{error}</div>}

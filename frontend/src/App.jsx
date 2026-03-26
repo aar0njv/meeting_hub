@@ -1,36 +1,49 @@
-import { Routes, Route, NavLink, Link } from 'react-router-dom';
+import { useState } from 'react';
 import DashboardPage from './pages/DashboardPage.jsx';
 import UploadPage from './pages/UploadPage.jsx';
 import TranscriptDetailPage from './pages/TranscriptDetailPage.jsx';
 
 function App() {
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [selectedTranscriptId, setSelectedTranscriptId] = useState(null);
+
+  const renderContent = () => {
+    if (selectedTranscriptId) {
+      return <TranscriptDetailPage id={selectedTranscriptId} onBack={() => setSelectedTranscriptId(null)} />;
+    }
+    if (currentView === 'upload') {
+      return <UploadPage onUploadSuccess={() => setCurrentView('dashboard')} />;
+    }
+    return <DashboardPage onSelectTranscript={(id) => setSelectedTranscriptId(id)} />;
+  };
   return (
     <div className="app">
       <aside className="app-sidebar">
-        <Link to="/" className="brand">Meeting Hub</Link>
         <nav className="sidebar-nav">
-          <NavLink 
-            to="/" 
-            className={({ isActive }) => (isActive ? 'sidebar-link active' : 'sidebar-link')}
+          <div
+            className={`sidebar-link ${!selectedTranscriptId && currentView === 'dashboard' ? 'active' : ''}`}
+            onClick={() => { setCurrentView('dashboard'); setSelectedTranscriptId(null); }}
+            style={{ cursor: 'pointer' }}
           >
             Dashboard
-          </NavLink>
-          <NavLink 
-            to="/upload" 
-            className={({ isActive }) => (isActive ? 'sidebar-link active' : 'sidebar-link')}
+          </div>
+          <div
+            className={`sidebar-link ${!selectedTranscriptId && currentView === 'upload' ? 'active' : ''}`}
+            onClick={() => { setCurrentView('upload'); setSelectedTranscriptId(null); }}
+            style={{ cursor: 'pointer' }}
           >
             Upload Transcripts
-          </NavLink>
+          </div>
         </nav>
       </aside>
 
       <div className="app-content">
+        <header className="app-header">
+          <div className="header-brand">Meeting Intelligence Hub</div>
+          <div className="header-logout">Logout</div>
+        </header>
         <main className="app-main">
-          <Routes>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/upload" element={<UploadPage />} />
-            <Route path="/transcripts/:id" element={<TranscriptDetailPage />} />
-          </Routes>
+          {renderContent()}
         </main>
       </div>
     </div>

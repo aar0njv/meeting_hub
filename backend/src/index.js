@@ -1,9 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const storage = require('./data/storage');
-const aiService = require('./services/mockAiService');
-require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -26,15 +25,9 @@ app.get('/', (_req, res) => {
 
 // TRANSCRIPTS
 app.get('/api/transcripts', (req, res) => {
-    // Return all transcripts with basic summary stats
     const list = storage.transcripts.map(t => {
-        const extraction = storage.extractions[t.id];
-        const sentiment = storage.sentiments[t.id];
         return {
             ...t,
-            totalActionItems: extraction ? extraction.actionItems.length : 0,
-            overallSentimentScore: sentiment ? sentiment.overallScore : 0,
-            // exclude full content for the list view to save bandwidth
             content: undefined
         };
     });
@@ -46,11 +39,7 @@ app.get('/api/transcripts/:id', (req, res) => {
     const transcript = storage.transcripts.find(t => t.id === id);
     if (!transcript) return res.status(404).json({ message: 'Transcript not found' });
     
-    // Attach analysis state
-    const extractions = storage.extractions[id] || { decisions: [], actionItems: [] };
-    const sentiment = storage.sentiments[id] || { overallScore: 0, timeline: [], speakerBreakdown: [] };
-
-    res.json({ ...transcript, extractions, sentiment });
+    res.json(transcript);
 });
 
 // UPLOADS
@@ -80,7 +69,6 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
     res.json({ message: 'Upload successful', transcripts: uploadedTranscripts });
 });
 
-// Error handling middleware for Multer
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError || err) {
         return res.status(400).json({ message: err.message });
@@ -88,43 +76,7 @@ app.use((err, req, res, next) => {
     next();
 });
 
-// AI FEATURES
-app.post('/api/transcripts/:id/extract', (req, res) => {
-    const id = Number(req.params.id);
-    const transcript = storage.transcripts.find(t => t.id === id);
-    if (!transcript) return res.status(404).json({ message: 'Transcript not found' });
 
-    // Call mock AI service
-    const extractedData = aiService.extractDecisionsAndActions(transcript.content);
-    storage.extractions[id] = extractedData;
-    
-    res.json(extractedData);
-});
-
-app.post('/api/transcripts/:id/sentiment', (req, res) => {
-    const id = Number(req.params.id);
-    const transcript = storage.transcripts.find(t => t.id === id);
-    if (!transcript) return res.status(404).json({ message: 'Transcript not found' });
-
-    const sentimentData = aiService.analyzeSentiment(transcript.content);
-    storage.sentiments[id] = sentimentData;
-
-    res.json(sentimentData);
-});
-
-// Chat endpoint (cross-meeting queries)
-app.post('/api/chat', (req, res) => {
-    const { question } = req.body;
-    
-    if (!question) {
-        return res.status(400).json({ message: 'Question is required' });
-    }
-    
-    // Provide ALL transcripts context for cross-meeting capability
-    const answerData = aiService.answerQuestion(question, storage.transcripts);
-
-    res.json(answerData);
-});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`API on port ${PORT}`));
