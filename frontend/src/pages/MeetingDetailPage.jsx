@@ -33,41 +33,41 @@ function MeetingDetailPage() {
         fetchMeeting();
     };
 
-    if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}><h2>Loading Meeting Details...</h2></div>;
-    if (error) return <div style={{ textAlign: 'center', marginTop: '4rem', color: 'var(--danger-color)' }}>{error}</div>;
+    if (loading) return <div className="loading-container"><h2>Loading Meeting Details...</h2></div>;
+    if (error) return <div className="error-container">{error}</div>;
     if (!meeting) return null;
 
     return (
         <div className="meeting-detail-page">
-            <Link to="/" className="btn" style={{ marginBottom: '2rem' }}>&larr; Back to Dashboard</Link>
+            <Link to="/" className="btn btn-back">&larr; Back to Dashboard</Link>
             
-            <div className="flex-between" style={{ marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+            <div className="flex-between page-header-container">
                 <div>
-                    <h1 style={{ marginBottom: '0.5rem' }}>{meeting.title}</h1>
-                    <div className="text-muted" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <h1 className="meeting-title">{meeting.title}</h1>
+                    <div className="text-muted page-meta-row">
                         <span>Date: {meeting.date}</span>
-                        <span style={{ fontSize: '1.2rem' }}>•</span>
+                        <span className="meta-separator">•</span>
                         <span>Transcripts: {meeting.transcripts?.length || 0}</span>
                     </div>
                 </div>
             </div>
 
             {/* Layout Grid: Left column for Main Content, Right Column for Chat */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', alignItems: 'start' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            <div className="meeting-layout-grid">
+                <div className="meeting-main-column">
                     
                     {/* Transcript Uploads */}
                     <section>
-                        <h2 style={{ marginBottom: '1rem' }}>Manage Transcripts</h2>
+                        <h2 className="section-title">Manage Transcripts</h2>
                         <UploadDropzone meetingId={meeting.id} onUploadSuccess={handleUploadSuccess} />
                         
                         {meeting.transcripts && meeting.transcripts.length > 0 && (
                             <div className="card">
                                 <h3 className="card-title">Uploaded Transcripts</h3>
-                                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                <ul className="transcript-list">
                                     {meeting.transcripts.map(t => (
-                                        <li key={t.id} style={{ padding: '12px 0', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ fontWeight: '500' }}>{t.fileName}</span>
+                                        <li key={t.id} className="transcript-list-item">
+                                            <span className="transcript-item-name">{t.fileName}</span>
                                             <span className="text-muted">
                                                 {t.wordCount} words • {t.speakerCount} speakers
                                             </span>
@@ -97,7 +97,7 @@ function MeetingDetailPage() {
                     </section>
                 </div>
 
-                <div style={{ position: 'sticky', top: '100px' }}>
+                <div className="chat-sidebar-container">
                     <ChatPanel meetingId={meeting.id} />
                 </div>
             </div>
