@@ -122,12 +122,32 @@ app.get('/api/transcripts/:id', requireAuth, async (req, res) => {
 // UPLOADS
 app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => {
     const userId = req.user.id;
-    const meetingId = req.body.meeting_id;
+    let meetingId = req.body.meeting_id;
 
-    if (!meetingId) return res.status(400).json({ message: 'meeting_id is required.' });
+    if (!meetingId || meetingId === "undefined" || meetingId === "null") {
+        return res.status(400).json({ message: 'meeting_id is required.' });
+    }
+
+    // Try to parse to integer if it's a numeric ID
+    if (!isNaN(meetingId)) {
+        meetingId = parseInt(meetingId, 10);
+    }
+
     if (!req.files || req.files.length === 0) return res.status(400).json({ message: 'No files uploaded.' });
 
     try {
+        // --- PRE-FLIGHT CHECK: Verify the meeting exists and belongs to the user ---
+        const { data: meetingExists, error: meetingCheckError } = await req.supabase
+            .from('meetings')
+            .select('id')
+            .eq('id', meetingId)
+            // .eq('user_id', userId) -> user_id check omitted if RLS handles it
+            .single();
+            
+        if (meetingCheckError || !meetingExists) {
+            return res.status(404).json({ message: `The meeting group (ID: ${meetingId}) does not exist or has been deleted. Please refresh the page and select a valid meeting.` });
+        }
+
         const uploadedTranscripts = [];
 
         for (let i = 0; i < req.files.length; i++) {
