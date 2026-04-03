@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const axios = require('axios');
 const cors = require('cors');
 const multer = require('multer');
 const { createClient } = require('@supabase/supabase-js');
@@ -123,13 +124,8 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
     const userId = req.user.id;
     const meetingId = req.body.meeting_id;
 
-    if (!meetingId) {
-        return res.status(400).json({ message: 'meeting_id is required. Please assign this upload to a meeting.' });
-    }
-
-    if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ message: 'No valid files uploaded.' });
-    }
+    if (!meetingId) return res.status(400).json({ message: 'meeting_id is required.' });
+    if (!req.files || req.files.length === 0) return res.status(400).json({ message: 'No files uploaded.' });
 
     try {
         const uploadedTranscripts = [];
@@ -137,27 +133,12 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
         for (let i = 0; i < req.files.length; i++) {
             const file = req.files[i];
             const text = file.buffer.toString('utf-8');
-            const wordCount = text.split(/\s+/).length;
-            const speakerMatches = text.match(/^[A-Z][a-z]+:/gm);
-            const uniqueSpeakers = speakerMatches ? new Set(speakerMatches).size : 1;
 
-            // 2. Define path starting with user's ID
+            // --- EXISTING SUPABASE LOGIC ---
             const filePath = `${userId}/${Date.now()}_${file.originalname}`;
-
-            // 3. Upload to Supabase Storage
-            const { data: storageData, error: storageError } = await req.supabase.storage
-                .from('transcripts')
-                .upload(filePath, file.buffer, {
-                    contentType: file.mimetype,
-                    upsert: false
-                });
-
-            if (storageError) throw storageError;
-
-            // Get the URL (if bucket is private this will be a generic path we can use later)
+            await req.supabase.storage.from('transcripts').upload(filePath, file.buffer);
             const { data: publicUrlData } = req.supabase.storage.from('transcripts').getPublicUrl(filePath);
 
-            // 4. Insert into PostgreSQL transcripts table
             const { data: transcriptRecord, error: dbError } = await req.supabase
                 .from('transcripts')
                 .insert([{
@@ -166,15 +147,44 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
                     file_name: file.originalname,
                     file_url: publicUrlData.publicUrl || filePath,
                     content: text,
-                    word_count: wordCount,
-                    speaker_count: uniqueSpeakers
+                    is_analyzed: false // Default to false
                 }])
-                .select()
-                .single();
+                .select().single();
 
             if (dbError) throw dbError;
 
-            uploadedTranscripts.push(transcriptRecord);
+            // --- NEW: AI INTEGRATION STEP ---
+            try {
+                // 1. Send to Python Service for Analysis (Features 1 & 2)
+                // We call /analyze for the table and /vectorize for the chatbot memory
+                const [analysisRes, vectorRes] = await Promise.all([
+                    axios.post('http://localhost:8000/analyze', { transcript: text }),
+                    axios.post('http://localhost:8000/vectorize', {
+                        transcript_id: transcriptRecord.id.toString(),
+                        filename: file.originalname,
+                        content: text
+                    })
+                ]);
+
+                // 2. Update the record in Supabase with the AI's findings
+                const { data: finalRecord, error: updateError } = await req.supabase
+                    .from('transcripts')
+                    .update({
+                        analysis_results: analysisRes.data, // Stores the JSON table data
+                        is_analyzed: true
+                    })
+                    .eq('id', transcriptRecord.id)
+                    .select()
+                    .single();
+
+                if (updateError) throw updateError;
+                uploadedTranscripts.push(finalRecord);
+
+            } catch (aiError) {
+                console.error("AI Service failed, but file was saved:", aiError.message);
+                // If AI fails, we still return the basic record so the UI doesn't break
+                uploadedTranscripts.push(transcriptRecord);
+            }
         }
 
         res.json({ message: 'Upload successful', transcripts: uploadedTranscripts });
