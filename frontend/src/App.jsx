@@ -3,12 +3,16 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import UploadPage from './pages/UploadPage.jsx';
 import TranscriptDetailPage from './pages/TranscriptDetailPage.jsx';
 import AuthPage from './pages/AuthPage.jsx';
+import Header from './components/Header.jsx';
+import Sidebar from './components/Sidebar.jsx';
+import Footer from './components/Footer.jsx';
 import { supabase } from './supabaseClient';
 
 function App() {
   const [session, setSession] = useState(null);
   const [currentView, setCurrentView] = useState('dashboard');
   const [selectedTranscriptId, setSelectedTranscriptId] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -44,31 +48,25 @@ function App() {
 
   return (
     <div className="app">
-      <aside className="app-sidebar">
-        <nav className="sidebar-nav">
-          <div
-            className={`sidebar-link clickable ${!selectedTranscriptId && currentView === 'dashboard' ? 'active' : ''}`}
-            onClick={() => { setCurrentView('dashboard'); setSelectedTranscriptId(null); }}
-          >
-            Dashboard
-          </div>
-          <div
-            className={`sidebar-link clickable ${!selectedTranscriptId && currentView === 'upload' ? 'active' : ''}`}
-            onClick={() => { setCurrentView('upload'); setSelectedTranscriptId(null); }}
-          >
-            Upload Transcripts
-          </div>
-        </nav>
-      </aside>
+      <Sidebar 
+        isSidebarOpen={isSidebarOpen} 
+        setIsSidebarOpen={setIsSidebarOpen} 
+        currentView={currentView} 
+        setCurrentView={setCurrentView}
+        selectedTranscriptId={selectedTranscriptId}
+        setSelectedTranscriptId={setSelectedTranscriptId}
+      />
 
       <div className="app-content">
-        <header className="app-header">
-          <div className="header-brand">Meeting Intelligence Hub</div>
-          <div className="header-logout clickable" onClick={handleLogout}>Logout</div>
-        </header>
+        <Header 
+          isSidebarOpen={isSidebarOpen} 
+          setIsSidebarOpen={setIsSidebarOpen} 
+          handleLogout={handleLogout} 
+        />
         <main className="app-main">
           {renderContent()}
         </main>
+        <Footer />
       </div>
     </div>
   );
