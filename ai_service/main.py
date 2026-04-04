@@ -68,7 +68,7 @@ async def analyze_transcript(req: AnalyzeRequest):
     
     system_prompt = """
     You are an expert meeting assistant. Analyze the following meeting transcript.
-    Extract the key decisions made and the action items assigned.
+    Extract the key decisions made, the action items assigned, and the overall sentiment of the meeting.
     
     You MUST respond with a valid JSON object in this exact format:
     {
@@ -81,8 +81,11 @@ async def analyze_transcript(req: AnalyzeRequest):
           "task": "Update schema",
           "due_date": "Next Tuesday"
         }
-      ]
+      ],
+      "sentiment": "positive"
     }
+    
+    The "sentiment" field MUST be exactly one of: "positive", "negative", or "neutral".
     """
     try:
         return call_gemini(system_prompt, req.transcript)

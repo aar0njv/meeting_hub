@@ -106,7 +106,7 @@ app.get('/api/transcripts/:id', requireAuth, async (req, res) => {
     try {
         const { data, error } = await req.supabase
             .from('transcripts')
-            .select('*')
+            .select('*, meetings(title, date)')
             .eq('id', req.params.id)
             .eq('user_id', req.user.id)
             .single();
@@ -159,6 +159,21 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
             await req.supabase.storage.from('transcripts').upload(filePath, file.buffer);
             const { data: publicUrlData } = req.supabase.storage.from('transcripts').getPublicUrl(filePath);
 
+            // Extract word and speaker count
+            const wordCount = text.trim().split(/\s+/).length || 0;
+            const speakerSet = new Set();
+            const lines = text.split('\n');
+            for (const line of lines) {
+                const match = line.match(/^([A-Za-z0-9\s_-]+):/);
+                if (match) {
+                    const name = match[1].trim();
+                    if (name.length > 0 && name.length < 30) {
+                        speakerSet.add(name);
+                    }
+                }
+            }
+            const speakerCount = speakerSet.size || 0;
+
             const { data: transcriptRecord, error: dbError } = await req.supabase
                 .from('transcripts')
                 .insert([{
@@ -167,6 +182,8 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
                     file_name: file.originalname,
                     file_url: publicUrlData.publicUrl || filePath,
                     content: text,
+                    word_count: wordCount,
+                    speaker_count: speakerCount,
                     is_analyzed: false // Default to false
                 }])
                 .select().single();
