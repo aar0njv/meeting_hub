@@ -11,10 +11,12 @@ function App() {
   const [session, setSession] = useState(null);
   const [currentView, setCurrentView] = useState('dashboard');
   const [selectedTranscriptId, setSelectedTranscriptId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setLoading(false);
     });
 
     const {
@@ -28,6 +30,8 @@ function App() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setCurrentView('dashboard');
+    setSelectedTranscriptId(null);
   };
 
   const renderContent = () => {
@@ -40,6 +44,7 @@ function App() {
     return <DashboardPage session={session} onSelectTranscript={(id) => setSelectedTranscriptId(id)} />;
   };
 
+  if (loading) return <div>Loading...</div>
   if (!session) {
     return <AuthPage />;
   }
@@ -47,12 +52,12 @@ function App() {
   return (
     <div className="app">
       <div className="app-content">
-        <Header 
+        <Header
           currentView={currentView}
           setCurrentView={setCurrentView}
           selectedTranscriptId={selectedTranscriptId}
           setSelectedTranscriptId={setSelectedTranscriptId}
-          handleLogout={handleLogout} 
+          handleLogout={handleLogout}
         />
         <main className="app-main">
           {renderContent()}

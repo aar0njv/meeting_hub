@@ -21,7 +21,7 @@ function UploadDropzone({ session, meetingId, onUploadSuccess }) {
   const handleFiles = async (files) => {
     setError('');
     const fileArray = Array.from(files);
-    
+
     if (fileArray.length === 0) return;
 
     if (!validateFiles(fileArray)) {
@@ -30,7 +30,7 @@ function UploadDropzone({ session, meetingId, onUploadSuccess }) {
     }
 
     setUploading(true);
-    setStatusText('Uploading files...');
+    setStatusText('Uploading to server...');
     const formData = new FormData();
     fileArray.forEach(f => formData.append('files', f));
     formData.append('meeting_id', meetingId);
@@ -43,7 +43,7 @@ function UploadDropzone({ session, meetingId, onUploadSuccess }) {
         },
         body: formData
       });
-      
+
       if (!res.ok) {
         let errorMsg = 'Upload failed';
         try {
@@ -54,9 +54,9 @@ function UploadDropzone({ session, meetingId, onUploadSuccess }) {
         }
         throw new Error(errorMsg);
       }
-
+      setStatusText('Processing files...');
       const data = await res.json();
-      
+
       if (onUploadSuccess) onUploadSuccess();
     } catch (err) {
       console.error(err);
@@ -84,7 +84,7 @@ function UploadDropzone({ session, meetingId, onUploadSuccess }) {
 
   return (
     <div className="upload-dropzone">
-      <div 
+      <div
         className={`dropzone-area ${isDragging ? 'dragging' : ''} ${uploading ? 'uploading' : ''}`}
         onClick={() => !uploading && fileInputRef.current.click()}
         onDragOver={onDragOver}
@@ -100,19 +100,19 @@ function UploadDropzone({ session, meetingId, onUploadSuccess }) {
         </div>
         <h3 className="dropzone-title">Drag & Drop Transcripts Here</h3>
         <p className="text-muted dropzone-subtitle">or click to browse (.txt, .vtt only)</p>
-        
-        <input 
-          type="file" 
-          multiple 
+
+        <input
+          type="file"
+          multiple
           accept=".txt,.vtt"
-          ref={fileInputRef} 
-          className="hidden-input" 
+          ref={fileInputRef}
+          className="hidden-input"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        
+
         {uploading && <p className="upload-status-text">{statusText}</p>}
       </div>
-      
+
       {error && <div className="upload-error-alert">{error}</div>}
     </div>
   );
