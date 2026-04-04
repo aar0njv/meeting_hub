@@ -325,14 +325,15 @@ h4 {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   padding: 1.5rem;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: var(--transition);
   text-decoration: none;
   color: inherit;
-  display: flex;
+  display: block;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
-  min-height: 140px;
+  overflow: visible;
+  height: auto;
+  min-height: fit-content;
 }
 
 .card:hover {
@@ -345,7 +346,7 @@ h4 {
 .card-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--primary-color);
   margin-bottom: 0.5rem;
 }
 
@@ -539,13 +540,11 @@ h4 {
 }
 
 .chat-sidebar-container {
-  position: sticky;
-  top: 2rem;
-  height: calc(100vh - 4rem);
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  align-items: stretch;
+  height: auto;
 }
 
 /* Upload Components & Utilities */

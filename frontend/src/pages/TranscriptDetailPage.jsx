@@ -35,19 +35,19 @@ function TranscriptDetailPage({ id, session, onBack }) {
                 Back to Dashboard
             </button>
 
-            <div className="flex-between page-header-container">
+            <div className="page-header-container">
                 <div>
-                    <h1 className="page-title">{transcript.file_name}</h1>
+                    <h1 className="page-title">{transcript.file_name.replace(/\.txt$/, '')}</h1>
                     <div className="text-muted page-meta-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span>Date: {transcript.meetings?.date || new Date(transcript.created_at).toLocaleDateString()}</span>
                         <span className="meta-separator">•</span>
                         <span>{transcript.speaker_count} speakers</span>
                         <span className="meta-separator">•</span>
                         {transcript.analysis_results?.sentiment ? (
-                            <span style={{ 
-                                color: transcript.analysis_results.sentiment === 'positive' ? 'var(--success-color)' : 
-                                       transcript.analysis_results.sentiment === 'negative' ? 'var(--danger-color)' : 
-                                       'var(--warning-color)',
+                            <span style={{
+                                color: transcript.analysis_results.sentiment === 'positive' ? 'var(--success-color)' :
+                                    transcript.analysis_results.sentiment === 'negative' ? 'var(--danger-color)' :
+                                        'var(--warning-color)',
                                 fontWeight: '600'
                             }}>
                                 Sentiment: {transcript.analysis_results.sentiment.charAt(0).toUpperCase() + transcript.analysis_results.sentiment.slice(1)}
@@ -69,7 +69,7 @@ function TranscriptDetailPage({ id, session, onBack }) {
                 {transcript.analysis_results && typeof transcript.analysis_results === 'object' && (
                     <div className="chat-sidebar-container">
                         {transcript.analysis_results.decisions && transcript.analysis_results.decisions.length > 0 && (
-                            <div className="card" style={{ marginBottom: '1.5rem' }}>
+                            <div className="card">
                                 <h3 className="card-title">Key Decisions</h3>
                                 <ul style={{ paddingLeft: '1.25rem', margin: 0, color: 'var(--text-main)', fontSize: '0.95rem' }}>
                                     {transcript.analysis_results.decisions.map((decision, index) => (

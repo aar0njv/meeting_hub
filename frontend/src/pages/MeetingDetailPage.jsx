@@ -40,7 +40,7 @@ function MeetingDetailPage() {
     return (
         <div className="meeting-detail-page">
             <Link to="/" className="btn btn-back">&larr; Back to Dashboard</Link>
-            
+
             <div className="flex-between page-header-container">
                 <div>
                     <h1 className="meeting-title">{meeting.title}</h1>
@@ -55,19 +55,19 @@ function MeetingDetailPage() {
             {/* Layout Grid: Left column for Main Content, Right Column for Chat */}
             <div className="meeting-layout-grid">
                 <div className="meeting-main-column">
-                    
+
                     {/* Transcript Uploads */}
                     <section>
                         <h2 className="section-title">Manage Transcripts</h2>
                         <UploadDropzone meetingId={meeting.id} onUploadSuccess={handleUploadSuccess} />
-                        
+
                         {meeting.transcripts && meeting.transcripts.length > 0 && (
                             <div className="card">
                                 <h3 className="card-title">Uploaded Transcripts</h3>
                                 <ul className="transcript-list">
                                     {meeting.transcripts.map(t => (
                                         <li key={t.id} className="transcript-list-item">
-                                            <span className="transcript-item-name">{t.fileName}</span>
+                                            <span className="transcript-item-name">{t.fileName.replace(/\.txt$/, '')}</span>
                                             <span className="text-muted">
                                                 {t.wordCount} words • {t.speakerCount} speakers
                                             </span>
@@ -80,19 +80,19 @@ function MeetingDetailPage() {
 
                     {/* Decisions and Action Items */}
                     <section>
-                        <DecisionsActionsPanel 
-                            meetingId={meeting.id} 
-                            extractions={meeting.extractions} 
-                            onRefresh={fetchMeeting} 
+                        <DecisionsActionsPanel
+                            meetingId={meeting.id}
+                            extractions={meeting.extractions}
+                            onRefresh={fetchMeeting}
                         />
                     </section>
 
                     {/* Sentiment Dashboard */}
                     <section>
-                        <SentimentDashboard 
-                            meetingId={meeting.id} 
-                            sentiment={meeting.sentiment} 
-                            onRefresh={fetchMeeting} 
+                        <SentimentDashboard
+                            meetingId={meeting.id}
+                            sentiment={meeting.sentiment}
+                            onRefresh={fetchMeeting}
                         />
                     </section>
                 </div>

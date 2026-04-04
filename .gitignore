@@ -39,3 +39,6 @@ frontend/build/
 # Backend builds
 backend/dist/
 backend/build/
+
+*.txt
+*.vtt
