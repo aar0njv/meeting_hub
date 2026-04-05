@@ -2,9 +2,9 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const COLORS = {
-    high: '#06ff00',    // green
-    neutral: '#ffe400', // yellow
-    low: '#ff1700'      // Red
+    high: '#029500ff',    // green
+    neutral: '#d5c424ff', // yellow
+    low: '#c72516ff'      // Red
 };
 
 function SentimentBox({ segments, overallSentiment }) {
@@ -38,23 +38,10 @@ function SentimentBox({ segments, overallSentiment }) {
                     </div>
                 </div>
 
-                <div style={{ width: '100%', height: 250, marginTop: '20px' }}>
+                <div className="graph" style={{ width: '100%', height: 350, marginTop: '20px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data} margin={{ top: 0, right: 0, left: -40, bottom: 0 }}>
-                            <Tooltip
-                                cursor={{ fill: 'transparent' }}
-                                content={({ active, payload }) => {
-                                    if (active && payload && payload.length) {
-                                        return (
-                                            <div className="custom-tooltip">
-                                                <p>{payload[0].payload.topic}</p>
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                }}
-                            />
-                            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        <BarChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }} barCategoryGap="95%">
+                            <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={45}>
                                 {data.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[entry.status]} />
                                 ))}
