@@ -205,7 +205,6 @@ async def chat_transcript(req: ChatRequest):
     
     Rules:
     1. If the answer is not in the context, say "I cannot find the answer to this in the uploaded transcripts." Do not make up information.
-    2. You MUST cite your sources inside brackets, e.g., (Source: file_name).
     """
 
     try:

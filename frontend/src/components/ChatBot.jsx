@@ -3,14 +3,17 @@ import { useState, useRef, useEffect } from 'react';
 function ChatBot({ transcriptId, session }) {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: "Hi! I've indexed this transcript. Ask me anything about the discussion or specific details." }
+        { role: 'assistant', content: "Ask me anything about the discussion or specific details." }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const chatEndRef = useRef(null);
 
     const scrollToBottom = () => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const parent = chatEndRef.current?.parentElement;
+        if (parent) {
+            parent.scrollTo({ top: parent.scrollHeight, behavior: 'smooth' });
+        }
     };
 
     useEffect(() => {
@@ -50,7 +53,7 @@ function ChatBot({ transcriptId, session }) {
                 className={`chatbot-toggle-btn ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
             </button>
