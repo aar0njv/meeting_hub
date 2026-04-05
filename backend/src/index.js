@@ -143,7 +143,7 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
             .eq('id', meetingId)
             // .eq('user_id', userId) -> user_id check omitted if RLS handles it
             .single();
-            
+
         if (meetingCheckError || !meetingExists) {
             return res.status(404).json({ message: `The meeting group (ID: ${meetingId}) does not exist or has been deleted. Please refresh the page and select a valid meeting.` });
         }
@@ -230,6 +230,21 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
         res.status(500).json({ message: err.message });
     }
 });
+
+
+app.post('/api/chat', requireAuth, async (req, res) => {
+    const { transcript_id, question } = req.body;
+    try {
+        const response = await axios.post('http://localhost:8000/chat', {
+            transcript_id: transcript_id,
+            question: question
+        });
+        res.json({ reply: response.data.answer });
+    } catch (err) {
+        res.status(500).json({ message: "AI Services currently  offline." });
+    }
+});
+
 
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError || err) {

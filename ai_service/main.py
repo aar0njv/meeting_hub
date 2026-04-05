@@ -4,7 +4,7 @@ import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from vector_service import add_transcript_to_vector_db, search_transcripts
+from vector_service import add_transcript_to_vector_db, search_transcripts, search_meeting_transcripts
 
 load_dotenv()
 
