@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ChatBot from '../components/ChatBot';
+import SentimentBox from '../components/SentimentBox';
 
 function TranscriptDetailPage({ id, session, onBack }) {
     const [transcript, setTranscript] = useState(null);
@@ -61,42 +62,39 @@ function TranscriptDetailPage({ id, session, onBack }) {
                 </div>
             </div>
 
-            <div className="meeting-layout-grid">
-                <div className="meeting-main-column">
-                    <div className="transcript-content" style={{ backgroundColor: 'var(--surface-color)', padding: '1.5rem', borderRadius: 'var(--border-radius)', border: '1px solid var(--border-color)' }}>
-                        {transcript.content || 'No transcript content available.'}
+            <div className="vertical-analysis-stack">
+                <SentimentBox 
+                    segments={transcript.analysis_results?.segments} 
+                    overallSentiment={transcript.analysis_results?.sentiment ? transcript.analysis_results.sentiment.charAt(0).toUpperCase() + transcript.analysis_results.sentiment.slice(1) : undefined}
+                />
+
+                {transcript.analysis_results?.decisions?.length > 0 && (
+                    <div className="card">
+                        <h3 className="card-title">Key Decisions</h3>
+                        <ul style={{ paddingLeft: '1.25rem', margin: 0, color: 'var(--text-main)', fontSize: '0.95rem' }}>
+                            {transcript.analysis_results.decisions.map((decision, index) => (
+                                <li key={index} style={{ marginBottom: '0.75rem', lineHeight: '1.4' }}>{decision}</li>
+                            ))}
+                        </ul>
                     </div>
-                </div>
+                )}
 
-                <div className="chat-sidebar-container">
-                    {transcript.analysis_results?.decisions?.length > 0 && (
-                        <div className="card">
-                            <h3 className="card-title">Key Decisions</h3>
-                            <ul style={{ paddingLeft: '1.25rem', margin: 0, color: 'var(--text-main)', fontSize: '0.95rem' }}>
-                                {transcript.analysis_results.decisions.map((decision, index) => (
-                                    <li key={index} style={{ marginBottom: '0.75rem', lineHeight: '1.4' }}>{decision}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {transcript.analysis_results?.action_items?.length > 0 && (
-                        <div className="card">
-                            <h3 className="card-title">Action Items</h3>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                {transcript.analysis_results.action_items.map((item, index) => (
-                                    <li key={index} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: index < transcript.analysis_results.action_items.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
-                                        <div style={{ fontWeight: '600', color: '#fff', marginBottom: '0.5rem' }}>{item.task}</div>
-                                        <div className="flex-between">
-                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Assignee: <span style={{ color: 'var(--primary-color)' }}>{item.owner}</span></span>
-                                            <span className="badge neutral">{item.due_date}</span>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </div>
+                {transcript.analysis_results?.action_items?.length > 0 && (
+                    <div className="card">
+                        <h3 className="card-title">Action Items</h3>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                            {transcript.analysis_results.action_items.map((item, index) => (
+                                <li key={index} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: index < transcript.analysis_results.action_items.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
+                                    <div style={{ fontWeight: '600', color: '#fff', marginBottom: '0.5rem' }}>{item.task}</div>
+                                    <div className="flex-between">
+                                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Assignee: <span style={{ color: 'var(--primary-color)' }}>{item.owner}</span></span>
+                                        <span className="badge neutral">{item.due_date}</span>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
         </div>
     );

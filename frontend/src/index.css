@@ -624,6 +624,88 @@ h4 {
   border-color: transparent;
 }
 
+.analysis-summary-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sentiment-status-text {
+  font-size: 1.8rem;
+  margin: 5px 0;
+  color: var(--text-main);
+}
+
+.chart-legend-dots {
+  font-size: 0.75rem;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.high {
+  background: #06ff00;
+}
+
+.dot.neutral {
+  background: #ffe400;
+}
+
+.dot.low {
+  background: #ff1700;
+}
+
+/* Focus Score Circle */
+.focus-circle-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.focus-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 8px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  /* Matches your gold theme */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.focus-percent {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.focus-subtext {
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* List Styling for the vertical flow */
+.vertical-analysis-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.analysis-item-card {
+  padding: 1.5rem;
+}
+
 /* Transcript Detail Styles */
 .transcript-content {
   white-space: pre-wrap;

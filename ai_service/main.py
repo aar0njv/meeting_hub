@@ -19,8 +19,6 @@ app = FastAPI(title="Meeting Intelligence AI Service")
 class AnalyzeRequest(BaseModel):
     transcript: str
 
-class SentimentRequest(BaseModel):
-    transcript: str
 
 class ChatRequest(BaseModel):
     question: str
@@ -86,66 +84,36 @@ async def analyze_transcript(req: AnalyzeRequest):
     if not req.transcript.strip():
         raise HTTPException(status_code=400, detail="Transcript is empty")
     
+    # NEW PROMPT: Combines everything including the chronological timeline segments
     system_prompt = """
-    You are an expert meeting assistant. Analyze the following meeting transcript.
-    Extract the key decisions made, the action items assigned, and the overall sentiment of the meeting.
+    You are an expert meeting analyst. Analyze the provided transcript and extract information into a structured JSON format.
     
-    You MUST respond with a valid JSON object in this exact format:
+    1. Chronological Segments: Break the meeting into 6-10 logical parts. For each part, provide:
+       - segment_index: (integer)
+       - topic: (short description of what was discussed)
+       - vibe: (Must be exactly one of: "enthusiasm", "agreement", "neutral", "frustration", or "conflict")
+
+    2. Key Decisions: A list of specific agreements reached.
+    3. Action Items: List of tasks with "owner", "task", and "due_date".
+    4. Global Sentiment: Exactly one of: "positive", "neutral", or "negative".
+
+    RESPONSE FORMAT (JSON ONLY):
     {
-      "decisions": [
-        "The team agreed to deploy the new UI on Friday."
+      "segments": [
+        { "segment_index": 1, "topic": "Budget discussion", "vibe": "agreement" }
       ],
+      "decisions": ["Allocated $5k for UI"],
       "action_items": [
-        {
-          "owner": "John Doe",
-          "task": "Update schema",
-          "due_date": "Next Tuesday"
-        }
+        { "owner": "Alice", "task": "Create wireframes", "due_date": "Next Monday" }
       ],
       "sentiment": "positive"
     }
-    
-    The "sentiment" field MUST be exactly one of: "positive", "negative", or "neutral".
     """
     try:
         return call_gemini(system_prompt, req.transcript)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/sentiment")
-async def analyze_sentiment(req: SentimentRequest):
-    if not req.transcript.strip():
-        raise HTTPException(status_code=400, detail="Transcript is empty")
-        
-    system_prompt = """
-    You are an expert behavioral analyst. Analyze the tone and sentiment of the meeting.
-    
-    1. Break down the chronological segments.
-    2. Analyze the overall sentiment of each speaker.
-    
-    You MUST respond with a valid JSON object in this exact format:
-    {
-      "segments": [
-        {
-          "segment_index": 1,
-          "topic": "Project Timeline",
-          "vibe": "conflict" 
-        }
-      ],
-      "speakers": [
-        {
-          "speaker": "Alice",
-          "overall_vibe": "enthusiasm",
-          "alignment": "Strongly supported new direction."
-        }
-      ]
-    }
-    Valid vibes are strictly: "agreement", "conflict", "frustration", "enthusiasm", or "neutral".
-    """
-    try:
-        return call_gemini(system_prompt, req.transcript)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/vectorize")
 async def vectorize_transcript(req: VectorizeRequest):
