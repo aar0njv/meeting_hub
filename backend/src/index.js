@@ -233,14 +233,37 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
 
 
 app.post('/api/chat', requireAuth, async (req, res) => {
-    const { transcript_id, question } = req.body;
+    const { meeting_id, transcript_id, question } = req.body;
+    let targetIds = [];
+
     try {
+        if (meeting_id) {
+            const { data, error } = await req.supabase
+                .from('transcripts')
+                .select('id')
+                .eq('meeting_id', meeting_id)
+
+            if (error) throw error;
+            targetIds = data.map(t => t.id.toString());
+        } else if (transcript_id) {
+            targetIds = [transcript_id.toString()];
+        }
+
+        if (targetIds.length === 0) {
+            return res.status(400).json({ message: "No transcripts found for the given meeting or transcript ID." });
+        }
+
         const response = await axios.post('http://localhost:8000/chat', {
-            transcript_id: transcript_id,
+            transcript_ids: targetIds,
             question: question
         });
-        res.json({ reply: response.data.answer });
+
+        res.json({
+            reply: response.data.answer,
+            sources: response.data.sources_used
+        });
     } catch (err) {
+        console.error("Chat Error: ", err.message);
         res.status(500).json({ message: "AI Services currently  offline." });
     }
 });

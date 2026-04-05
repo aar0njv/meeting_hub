@@ -4,7 +4,7 @@ import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from vector_service import add_transcript_to_vector_db, search_transcripts, search_meeting_transcripts
+from vector_service import add_transcript_to_vector_db, search_vector_db
 
 load_dotenv()
 
@@ -24,8 +24,8 @@ class SentimentRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     question: str
-    transcript_id: str | None = None
-    transcript_content: str | None = None 
+    transcript_ids: list[str] | None = None
+    transcript_content: str | None = None
 
 class VectorizeRequest(BaseModel):
     transcript_id: str
@@ -50,16 +50,17 @@ def call_gemini(system_prompt: str, user_text: str, force_json: bool = True):
 
     headers = {"Content-Type": "application/json"}
     
-    res = requests.post(GEMINI_URL, headers=headers, json=payload)
-    res.raise_for_status()
-
-    raw_content = res.json()['candidates'][0]['content']['parts'][0]['text']
+    try:
+        res = requests.post(GEMINI_URL, headers=headers, json=payload)
+        res.raise_for_status()
+        raw_content = res.json()['candidates'][0]['content']['parts'][0]['text']
     
-    if force_json:
-        return json.loads(raw_content.strip())
-    else:
+        if force_json:
+            return json.loads(raw_content.strip())
         return raw_content.strip()
-
+    except Exception as e:
+        print(f"Gemini API Error: {e}")
+        raise
 
 @app.post("/analyze")
 async def analyze_transcript(req: AnalyzeRequest):
@@ -129,7 +130,6 @@ async def analyze_sentiment(req: SentimentRequest):
 
 @app.post("/vectorize")
 async def vectorize_transcript(req: VectorizeRequest):
-    """Store transcript in ChromaDB for chat retrieval."""
     try:
         chunks_added = add_transcript_to_vector_db(req.transcript_id, req.filename, req.content)
         return {"status": "success", "chunks_added": chunks_added}
@@ -148,22 +148,31 @@ async def chat_transcript(req: ChatRequest):
         sources = ["Provided Transcript"]
     else:
         try:
-            search_results = search_transcripts(
+            search_results = search_vector_db(
                 query=req.question, 
-                n_results=5, 
-                transcript_id=req.transcript_id
+                n_results=7, 
+                transcript_ids=req.transcript_ids
             )
             
             if search_results['documents'] and len(search_results['documents'][0]) > 0:
                 docs = search_results['documents'][0]
                 metadatas = search_results['metadatas'][0]
                 for i in range(len(docs)):
-                    context_chunks.append({"text": docs[i], "filename": metadatas[i]["filename"]})
+                    context_chunks.append({
+                        "text": docs[i], 
+                        "filename": metadatas[i]["filename"]
+                    })
             
             if not context_chunks:
-                return {"answer": "I could not find any relevant information in the transcripts.", "sources_used": []}
+                return {
+                    "answer": "I could not find any relevant information in the transcripts.",
+                    "sources_used": []
+                }
                 
-            context_text = "\n\n".join([f"Source: {chunk['filename']}\nContent: {chunk['text']}" for chunk in context_chunks])
+            context_text = "\n\n".join([
+                f"Source: {chunk['filename']}\nContent: {chunk['text']}"
+                for chunk in context_chunks
+            ])
             sources = list(set([chunk["filename"] for chunk in context_chunks]))
             
         except Exception as e:
