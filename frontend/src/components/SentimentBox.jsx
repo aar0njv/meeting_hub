@@ -41,6 +41,22 @@ function SentimentBox({ segments, overallSentiment }) {
                 <div className="graph" style={{ width: '100%', height: 350, marginTop: '20px' }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }} barCategoryGap="95%">
+                            <Tooltip
+                                cursor={{ fill: 'rgba(255, 255, 255, 0.08)' }}
+                                offset={0}
+                                allowEscapeViewBox={{ x: true, y: true }}
+                                wrapperStyle={{ zIndex: 100 }}
+                                content={({ active, payload }) => {
+                                    if (active && payload && payload.length) {
+                                        return (
+                                            <div className="cloud-tooltip">
+                                                <p>{payload[0].payload.topic}</p>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                }}
+                            />
                             <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={45}>
                                 {data.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[entry.status]} />

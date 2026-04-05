@@ -645,6 +645,40 @@ h4 {
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+.cloud-tooltip {
+  background-color: var(--surface-color);
+  color: var(--text-main);
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 400;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  max-width: 200px;
+  position: relative;
+  border: 1px solid var(--primary-color);
+  transform: translate(-50%, calc(-100% - 15px));
+}
+
+.cloud-tooltip p {
+  margin: 0;
+  line-height: 1.3;
+}
+
+.cloud-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  /* Arrow points down from the bottom edge */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 8px 0;
+  border-style: solid;
+  border-color: var(--primary-color) transparent transparent transparent;
+  display: block;
+  width: 0;
+}
+
 .chart-legend-dots {
   font-size: 0.75rem;
   display: flex;

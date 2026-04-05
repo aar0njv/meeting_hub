@@ -70,7 +70,7 @@ function DashboardPage({ session, onSelectTranscript }) {
                                     <div className="card clickable-card" key={t.id} onClick={() => onSelectTranscript(t.id)}>
                                         <div className="card-title">{t.file_name.replace(/\.txt$/, '')}</div>
                                         <div className="card-meta">
-                                            Recorded on: {new Date(t.created_at).toLocaleDateString()}
+                                            Uploaded on: {new Date(t.created_at).toLocaleDateString()}
                                         </div>
                                         <div className="card-stats">
                                             <div className="stat">
