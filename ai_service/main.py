@@ -52,14 +52,33 @@ def call_gemini(system_prompt: str, user_text: str, force_json: bool = True):
     
     try:
         res = requests.post(GEMINI_URL, headers=headers, json=payload)
-        res.raise_for_status()
-        raw_content = res.json()['candidates'][0]['content']['parts'][0]['text']
+        
+        # 1. Catch HTTP errors (like 400, 404, 500)
+        if res.status_code != 200:
+            print(f"❌ Google API Error {res.status_code}: {res.text}")
+            res.raise_for_status()
+
+        data = res.json()
+
+        # 2. Check if Gemini blocked the prompt (Safety Filters)
+        # If 'content' is missing, it means the model refused to answer.
+        if 'candidates' not in data or 'content' not in data['candidates'][0]:
+            finish_reason = data.get('candidates', [{}])[0].get('finishReason', 'UNKNOWN')
+            print(f"⚠️ Model blocked response. Reason: {finish_reason}")
+            print(f"Full Response JSON: {json.dumps(data, indent=2)}")
+            return "I'm sorry, I cannot answer that question based on the transcript content (Blocked by Safety Filters)."
+
+        raw_content = data['candidates'][0]['content']['parts'][0]['text']
     
         if force_json:
             return json.loads(raw_content.strip())
         return raw_content.strip()
+
+    except requests.exceptions.RequestException as e:
+        print(f"Network Error calling Gemini: {e}")
+        raise
     except Exception as e:
-        print(f"Gemini API Error: {e}")
+        print(f"Internal Error in call_gemini: {e}")
         raise
 
 @app.post("/analyze")

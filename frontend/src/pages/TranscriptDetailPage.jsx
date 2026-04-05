@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ChatBot from '../components/ChatBot';
 
 function TranscriptDetailPage({ id, session, onBack }) {
     const [transcript, setTranscript] = useState(null);
@@ -36,26 +37,27 @@ function TranscriptDetailPage({ id, session, onBack }) {
             </button>
 
             <div className="page-header-container">
-                <div>
-                    <h1 className="page-title">{transcript.file_name.replace(/\.txt$/, '')}</h1>
-                    <div className="text-muted page-meta-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span>Date: {transcript.meetings?.date || new Date(transcript.created_at).toLocaleDateString()}</span>
-                        <span className="meta-separator">•</span>
-                        <span>{transcript.speaker_count} speakers</span>
-                        <span className="meta-separator">•</span>
-                        {transcript.analysis_results?.sentiment ? (
-                            <span style={{
-                                color: transcript.analysis_results.sentiment === 'positive' ? 'var(--success-color)' :
-                                    transcript.analysis_results.sentiment === 'negative' ? 'var(--danger-color)' :
-                                        'var(--warning-color)',
-                                fontWeight: '600'
-                            }}>
-                                Sentiment: {transcript.analysis_results.sentiment.charAt(0).toUpperCase() + transcript.analysis_results.sentiment.slice(1)}
-                            </span>
-                        ) : (
-                            <span>Sentiment: Pending</span>
-                        )}
-                    </div>
+                <div className="header-title-group">
+                    <h1 className="page-title" style={{ margin: 0 }}>
+                        {transcript.file_name.replace(/\.txt$/, '')}
+                    </h1>
+                    <ChatBot transcriptId={id} session={session} />
+                </div>
+
+                <div className="text-muted page-meta-row" style={{ marginTop: '10px' }}>
+                    <span>Date: {transcript.meetings?.date || new Date(transcript.created_at).toLocaleDateString()}</span>
+                    <span className="meta-separator">•</span>
+                    <span>{transcript.speaker_count} speakers</span>
+                    <span className="meta-separator">•</span>
+                    {transcript.analysis_results?.sentiment && (
+                        <span style={{
+                            color: transcript.analysis_results.sentiment === 'positive' ? 'var(--success-color)' :
+                                transcript.analysis_results.sentiment === 'negative' ? 'var(--danger-color)' : 'var(--warning-color)',
+                            fontWeight: '600'
+                        }}>
+                            Sentiment: {transcript.analysis_results.sentiment.charAt(0).toUpperCase() + transcript.analysis_results.sentiment.slice(1)}
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -66,53 +68,35 @@ function TranscriptDetailPage({ id, session, onBack }) {
                     </div>
                 </div>
 
-                {transcript.analysis_results && typeof transcript.analysis_results === 'object' && (
-                    <div className="chat-sidebar-container">
-                        {transcript.analysis_results.decisions && transcript.analysis_results.decisions.length > 0 && (
-                            <div className="card">
-                                <h3 className="card-title">Key Decisions</h3>
-                                <ul style={{ paddingLeft: '1.25rem', margin: 0, color: 'var(--text-main)', fontSize: '0.95rem' }}>
-                                    {transcript.analysis_results.decisions.map((decision, index) => (
-                                        <li key={index} style={{ marginBottom: '0.75rem', lineHeight: '1.4' }}>{decision}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {transcript.analysis_results.action_items && transcript.analysis_results.action_items.length > 0 && (
-                            <div className="card">
-                                <h3 className="card-title">Action Items</h3>
-                                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                    {transcript.analysis_results.action_items.map((item, index) => (
-                                        <li key={index} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: index < transcript.analysis_results.action_items.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
-                                            <div style={{ fontWeight: '600', color: '#fff', marginBottom: '0.5rem', lineHeight: '1.3' }}>{item.task}</div>
-                                            <div className="flex-between">
-                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Assignee: <span style={{ color: 'var(--primary-color)', fontWeight: '500' }}>{item.owner}</span></span>
-                                                <span className="badge neutral">{item.due_date}</span>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {(!transcript.analysis_results.decisions || transcript.analysis_results.decisions.length === 0) && (!transcript.analysis_results.action_items || transcript.analysis_results.action_items.length === 0) && (
-                            <div className="card">
-                                <h3 className="card-title">Analysis Completed</h3>
-                                <p className="text-muted" style={{ margin: 0, fontSize: '0.9rem' }}>No key decisions or action items were identified in this transcript.</p>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {(!transcript.analysis_results || typeof transcript.analysis_results !== 'object') && (
-                    <div className="chat-sidebar-container">
+                <div className="chat-sidebar-container">
+                    {transcript.analysis_results?.decisions?.length > 0 && (
                         <div className="card">
-                            <h3 className="card-title">Analysis Pending</h3>
-                            <p className="text-muted" style={{ margin: 0, fontSize: '0.9rem' }}>We are still analyzing this transcript or no data was extracted. Please check back later.</p>
+                            <h3 className="card-title">Key Decisions</h3>
+                            <ul style={{ paddingLeft: '1.25rem', margin: 0, color: 'var(--text-main)', fontSize: '0.95rem' }}>
+                                {transcript.analysis_results.decisions.map((decision, index) => (
+                                    <li key={index} style={{ marginBottom: '0.75rem', lineHeight: '1.4' }}>{decision}</li>
+                                ))}
+                            </ul>
                         </div>
-                    </div>
-                )}
+                    )}
+
+                    {transcript.analysis_results?.action_items?.length > 0 && (
+                        <div className="card">
+                            <h3 className="card-title">Action Items</h3>
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                {transcript.analysis_results.action_items.map((item, index) => (
+                                    <li key={index} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: index < transcript.analysis_results.action_items.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
+                                        <div style={{ fontWeight: '600', color: '#fff', marginBottom: '0.5rem' }}>{item.task}</div>
+                                        <div className="flex-between">
+                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Assignee: <span style={{ color: 'var(--primary-color)' }}>{item.owner}</span></span>
+                                            <span className="badge neutral">{item.due_date}</span>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

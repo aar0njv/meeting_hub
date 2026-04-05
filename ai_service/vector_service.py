@@ -54,7 +54,7 @@ def add_transcript_to_vector_db(transcript_id: str, filename: str, content: str)
     print(f"Added {len(chunks)} chunks for {filename} to ChromaDB.")
     return len(chunks)
 
-def search_vector_db(query: str, n_results: int = 5, transcripts_ids: list = None):
+def search_vector_db(query: str, n_results: int = 5, transcript_ids: list = None):
     collection_count = collection.count()
     if collection_count == 0:
         return {"documents": [[]], "metadatas": [[]]}
@@ -62,11 +62,11 @@ def search_vector_db(query: str, n_results: int = 5, transcripts_ids: list = Non
     actual_n = min(n_results, collection_count)
 
     where_filter = None
-    if transcripts_ids:
-        if len(transcripts_ids) == 1:
-            where_filter = {"transcript_id": transcripts_ids[0]}
+    if transcript_ids:
+        if len(transcript_ids) == 1:
+            where_filter = {"transcript_id": transcript_ids[0]}
         else:
-            where_filter = {"transcript_id": {"$in": transcripts_ids}}
+            where_filter = {"transcript_id": {"$in": transcript_ids}}
 
     
     results = collection.query(

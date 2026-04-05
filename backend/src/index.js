@@ -136,100 +136,101 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
     if (!req.files || req.files.length === 0) return res.status(400).json({ message: 'No files uploaded.' });
 
     try {
-        // --- PRE-FLIGHT CHECK: Verify the meeting exists and belongs to the user ---
-        const { data: meetingExists, error: meetingCheckError } = await req.supabase
-            .from('meetings')
-            .select('id')
-            .eq('id', meetingId)
-            // .eq('user_id', userId) -> user_id check omitted if RLS handles it
-            .single();
+            // --- PRE-FLIGHT CHECK: Verify the meeting exists and belongs to the user ---
+            const { data: meetingExists, error: meetingCheckError } = await req.supabase
+                .from('meetings')
+                .select('id')
+                .eq('id', meetingId)
+                // .eq('user_id', userId) -> user_id check omitted if RLS handles it
+                .single();
 
-        if (meetingCheckError || !meetingExists) {
-            return res.status(404).json({ message: `The meeting group (ID: ${meetingId}) does not exist or has been deleted. Please refresh the page and select a valid meeting.` });
-        }
+            if (meetingCheckError || !meetingExists) {
+                return res.status(404).json({ message: `The meeting group (ID: ${meetingId}) does not exist or has been deleted. Please refresh the page and select a valid meeting.` });
+            }
 
-        const uploadedTranscripts = [];
+            const uploadedTranscripts = [];
 
-        for (let i = 0; i < req.files.length; i++) {
-            const file = req.files[i];
-            const text = file.buffer.toString('utf-8');
+            for (let i = 0; i < req.files.length; i++) {
+                const file = req.files[i];
+                const text = file.buffer.toString('utf-8');
 
-            // --- EXISTING SUPABASE LOGIC ---
-            const filePath = `${userId}/${Date.now()}_${file.originalname}`;
-            await req.supabase.storage.from('transcripts').upload(filePath, file.buffer);
-            const { data: publicUrlData } = req.supabase.storage.from('transcripts').getPublicUrl(filePath);
+                // --- EXISTING SUPABASE LOGIC ---
+                const filePath = `${userId}/${Date.now()}_${file.originalname}`;
+                await req.supabase.storage.from('transcripts').upload(filePath, file.buffer);
+                const { data: publicUrlData } = req.supabase.storage.from('transcripts').getPublicUrl(filePath);
 
-            // Extract word and speaker count
-            const wordCount = text.trim().split(/\s+/).length || 0;
-            const speakerSet = new Set();
-            const lines = text.split('\n');
-            for (const line of lines) {
-                const match = line.match(/^([A-Za-z0-9\s_-]+):/);
-                if (match) {
-                    const name = match[1].trim();
-                    if (name.length > 0 && name.length < 30) {
-                        speakerSet.add(name);
+                // Extract word and speaker count
+                const wordCount = text.trim().split(/\s+/).length || 0;
+                const speakerSet = new Set();
+                const lines = text.split('\n');
+                for (const line of lines) {
+                    const match = line.match(/^([A-Za-z0-9\s_-]+):/);
+                    if (match) {
+                        const name = match[1].trim();
+                        if (name.length > 0 && name.length < 30) {
+                            speakerSet.add(name);
+                        }
                     }
                 }
-            }
-            const speakerCount = speakerSet.size || 0;
+                const speakerCount = speakerSet.size || 0;
 
-            const { data: transcriptRecord, error: dbError } = await req.supabase
-                .from('transcripts')
-                .insert([{
-                    meeting_id: meetingId,
-                    user_id: userId,
-                    file_name: file.originalname,
-                    file_url: publicUrlData.publicUrl || filePath,
-                    content: text,
-                    word_count: wordCount,
-                    speaker_count: speakerCount,
-                    is_analyzed: false // Default to false
-                }])
-                .select().single();
-
-            if (dbError) throw dbError;
-
-            // --- NEW: AI INTEGRATION STEP ---
-            try {
-                // 1. Send to Python Service for Analysis (Features 1 & 2)
-                // We call /analyze for the table and /vectorize for the chatbot memory
-                const [analysisRes, vectorRes] = await Promise.all([
-                    axios.post('http://localhost:8000/analyze', { transcript: text }),
-                    axios.post('http://localhost:8000/vectorize', {
-                        transcript_id: transcriptRecord.id.toString(),
-                        filename: file.originalname,
-                        content: text
-                    })
-                ]);
-
-                // 2. Update the record in Supabase with the AI's findings
-                const { data: finalRecord, error: updateError } = await req.supabase
+                const { data: transcriptRecord, error: dbError } = await req.supabase
                     .from('transcripts')
-                    .update({
-                        analysis_results: analysisRes.data, // Stores the JSON table data
-                        is_analyzed: true
-                    })
-                    .eq('id', transcriptRecord.id)
-                    .select()
-                    .single();
+                    .insert([{
+                        meeting_id: meetingId,
+                        user_id: userId,
+                        file_name: file.originalname,
+                        file_url: publicUrlData.publicUrl || filePath,
+                        content: text,
+                        word_count: wordCount,
+                        speaker_count: speakerCount,
+                        is_analyzed: false // Default to false
+                    }])
+                    .select().single();
 
-                if (updateError) throw updateError;
-                uploadedTranscripts.push(finalRecord);
+                if (dbError) throw dbError;
 
-            } catch (aiError) {
-                console.error("AI Service failed, but file was saved:", aiError.message);
-                // If AI fails, we still return the basic record so the UI doesn't break
-                uploadedTranscripts.push(transcriptRecord);
+                // --- NEW: AI INTEGRATION STEP ---
+                try {
+                    // 1. Send to Python Service for Analysis (Features 1 & 2)
+                    // We call /analyze for the table and /vectorize for the chatbot memory
+                    const [analysisRes, vectorRes] = await Promise.all([
+                        axios.post('http://localhost:8000/analyze', { transcript: text }),
+                        axios.post('http://localhost:8000/vectorize', {
+                            transcript_id: transcriptRecord.id.toString(),
+                            filename: file.originalname,
+                            content: text
+                        })
+                    ]);
+
+                    // 2. Update the record in Supabase with the AI's findings
+                    const { data: finalRecord, error: updateError } = await req.supabase
+                        .from('transcripts')
+                        .update({
+                            analysis_results: analysisRes.data, // Stores the JSON table data
+                            is_analyzed: true
+                        })
+                        .eq('id', transcriptRecord.id)
+                        .select()
+                        .single();
+
+                    if (updateError) throw updateError;
+                    uploadedTranscripts.push(finalRecord);
+
+                } catch (aiError) {
+                    console.error("AI Service failed, but file was saved:", aiError.message);
+                    // If AI fails, we still return the basic record so the UI doesn't break
+                    uploadedTranscripts.push(transcriptRecord);
+                }
             }
-        }
 
-        res.json({ message: 'Upload successful', transcripts: uploadedTranscripts });
-    } catch (err) {
-        console.error("Upload error:", err);
-        res.status(500).json({ message: err.message });
-    }
-});
+            res.json({ message: 'Upload successful', transcripts: uploadedTranscripts });
+        } catch (err) {
+            console.error("Upload error:", err);
+            res.status(500).json({ message: err.message });
+        }
+    });
+
 
 
 app.post('/api/chat', requireAuth, async (req, res) => {
