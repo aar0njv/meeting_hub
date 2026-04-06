@@ -141,7 +141,7 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
             .from('meetings')
             .select('id')
             .eq('id', meetingId)
-            // .eq('user_id', userId) -> user_id check omitted if RLS handles it
+            .eq('user_id', userId)
             .single();
 
         if (meetingCheckError || !meetingExists) {

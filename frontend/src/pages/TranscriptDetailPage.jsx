@@ -65,7 +65,7 @@ function TranscriptDetailPage({ id, session, onBack }) {
             <div className="vertical-analysis-stack">
                 <SentimentBox 
                     segments={transcript.analysis_results?.segments} 
-                    overallSentiment={transcript.analysis_results?.sentiment ? transcript.analysis_results.sentiment.charAt(0).toUpperCase() + transcript.analysis_results.sentiment.slice(1) : undefined}
+                    focusScore={transcript.analysis_results?.focus_score}
                 />
 
                 {transcript.analysis_results?.decisions?.length > 0 && (

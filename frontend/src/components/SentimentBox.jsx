@@ -7,8 +7,10 @@ const COLORS = {
     low: '#c72516ff'      // Red
 };
 
-function SentimentBox({ segments, overallSentiment }) {
+function SentimentBox({ segments, focusScore }) {
     if (!segments) return null;
+
+    const displayScore = Math.round(Number(focusScore)) || 0;
 
     const data = segments.map(s => {
         let status = 'neutral';
@@ -67,15 +69,17 @@ function SentimentBox({ segments, overallSentiment }) {
                 </div>
             </div>
 
-            {/* FOCUS SCORE MOCKUP */}
             <div className="card focus-score-card">
                 <p className="stat-label">FOCUS SCORE</p>
                 <div className="focus-circle-container">
-                    <div className="focus-circle">
-                        <span className="focus-percent">85%</span>
+                    <div className="focus-circle" style={{ '--percentage': displayScore }}>
+                        <span className="focus-percent">{displayScore}%</span>
                     </div>
                 </div>
-                <p className="focus-subtext">High topical consistency detected throughout the call.</p>
+                <p className="focus-subtext">
+                    {displayScore > 70 ? "High topical consistency detected."
+                        : "Varied discussion topics detected."}
+                </p>
             </div>
         </div>
     );

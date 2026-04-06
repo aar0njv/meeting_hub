@@ -1,7 +1,9 @@
 import chromadb
 from chromadb.utils import embedding_functions
 
-chroma_client = chromadb.PersistentClient(path="./chroma_data")
+chroma_client = chromadb.PersistentClient(path="./chroma_data",
+                                          settings=chromadb.Settings(anonymized_telemetry=False)
+)
 
 
 sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
@@ -22,14 +24,22 @@ def chunk_text(text: str, chunk_size: int = 150, overlap: int = 30):
     for i in range(0, len(words), chunk_size - overlap):
         chunk = " ".join(words[i:i + chunk_size])
         chunks.append(chunk)
+
+        if i + chunk_size >= len(words):
+            break
     return chunks
 
 
 
 def add_transcript_to_vector_db(transcript_id: str, filename: str, content: str):
     """Chunks the text and stores it in ChromaDB with metadata for citations."""
+    
+    try:
+        collection.delete(where={"transcript_id": str(transcript_id)})
+    except Exception:
+        pass
+    
     chunks = chunk_text(content)
-
     if not chunks:
         return 0
     
@@ -39,8 +49,9 @@ def add_transcript_to_vector_db(transcript_id: str, filename: str, content: str)
     
     for i, chunk in enumerate(chunks):
         documents.append(chunk)
-        metadatas.append({"transcript_id": transcript_id, "filename": filename})
-        ids.append(f"transcript_{transcript_id}_chunk_{i}")
+        metadatas.append({"transcript_id": str(transcript_id),
+                            "filename": filename})
+        ids.append(f"id_{transcript_id}_chunk_{i}")
         
     if not documents:
         return 0
@@ -63,10 +74,13 @@ def search_vector_db(query: str, n_results: int = 5, transcript_ids: list = None
 
     where_filter = None
     if transcript_ids:
-        if len(transcript_ids) == 1:
-            where_filter = {"transcript_id": transcript_ids[0]}
+
+        clean_ids = [str(tid) for tid in transcript_ids]
+
+        if len(clean_ids) == 1:
+            where_filter = {"transcript_id": clean_ids[0]}
         else:
-            where_filter = {"transcript_id": {"$in": transcript_ids}}
+            where_filter = {"transcript_id": {"$in": clean_ids}}
 
     
     results = collection.query(
