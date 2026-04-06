@@ -769,6 +769,21 @@ h4 {
   color: var(--text-main);
 }
 
+.primary-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.primary-btn:hover {
+  background-color: var(--primary-hover);
+  border: 1px solid var(--primary-color);
+}
+
 /* Meeting Detail Layout */
 .meeting-layout-grid {
   display: grid;

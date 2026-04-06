@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { exportTranscriptSummary } from '../utils/exportPdf';
+import { Download } from 'lucide-react';
 import ChatBot from '../components/ChatBot';
 import SentimentBox from '../components/SentimentBox';
 
@@ -26,6 +28,17 @@ function TranscriptDetailPage({ id, session, onBack }) {
         fetchTranscript();
     }, [id]);
 
+    const handleExport = () => {
+        const meetingTitle = transcript.meetings?.title || "Meeting";
+        const transcriptTitle = transcript.file_name?.replace(/\.txt$/, '') || "Transcript";
+
+        if (transcript.analysis_results) {
+            exportTranscriptSummary(meetingTitle, transcriptTitle, transcript.analysis_results);
+        } else {
+            alert("Analysis data not ready for export.");
+        }
+    };
+
     if (loading) return <div className="loading-container"><h2>Loading Details...</h2></div>;
     if (error) return <div className="error-container">{error}</div>;
     if (!transcript) return null;
@@ -38,14 +51,35 @@ function TranscriptDetailPage({ id, session, onBack }) {
             </button>
 
             <div className="page-header-container">
-                <div className="header-title-group">
-                    <h1 className="page-title" style={{ margin: 0 }}>
-                        {transcript.file_name.replace(/\.txt$/, '')}
-                    </h1>
-                    <ChatBot transcriptId={id} session={session} />
+                <div className="flex-between" style={{ alignItems: 'flex-start' }}>
+                    <div className="header-title-group">
+                        <h1 className="page-title" style={{ margin: 0 }}>
+                            {transcript.file_name.replace(/\.txt$/, '')}
+                        </h1>
+                        {/* Added a small margin to separate title from chatbot */}
+                        <div style={{ marginTop: '10px' }}>
+                            <ChatBot transcriptId={id} session={session} />
+                        </div>
+                    </div>
+
+                    {/* --- NEW EXPORT BUTTON --- */}
+                    <button
+                        className="btn primary-btn"
+                        onClick={handleExport}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '10px 16px'
+                        }}
+                    >
+                        <Download size={18} />
+                        Export Summary
+                    </button>
+                    {/* ------------------------- */}
                 </div>
 
-                <div className="text-muted page-meta-row" style={{ marginTop: '10px' }}>
+                <div className="text-muted page-meta-row" style={{ marginTop: '15px' }}>
                     <span>Date: {transcript.meetings?.date || new Date(transcript.created_at).toLocaleDateString()}</span>
                     <span className="meta-separator">•</span>
                     <span>{transcript.speaker_count} speakers</span>
@@ -63,8 +97,8 @@ function TranscriptDetailPage({ id, session, onBack }) {
             </div>
 
             <div className="vertical-analysis-stack">
-                <SentimentBox 
-                    segments={transcript.analysis_results?.segments} 
+                <SentimentBox
+                    segments={transcript.analysis_results?.segments}
                     focusScore={transcript.analysis_results?.focus_score}
                 />
 
