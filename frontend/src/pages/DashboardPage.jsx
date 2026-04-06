@@ -43,7 +43,7 @@ function DashboardPage({ session, onSelectTranscript }) {
     return (
         <div className="dashboard-page">
             <div className="page-description">
-                <p>Complete list of your analyzed meeting transcripts, grouped by Project.</p>
+                <p>List of analyzed meeting transcripts, grouped by Project.</p>
             </div>
 
             {Object.keys(grouped).length === 0 ? (

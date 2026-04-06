@@ -7,6 +7,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const app = express();
@@ -195,8 +196,8 @@ app.post('/api/upload', requireAuth, upload.array('files'), async (req, res) => 
                 // 1. Send to Python Service for Analysis (Features 1 & 2)
                 // We call /analyze for the table and /vectorize for the chatbot memory
                 const [analysisRes, vectorRes] = await Promise.all([
-                    axios.post('http://localhost:8000/analyze', { transcript: text }),
-                    axios.post('http://localhost:8000/vectorize', {
+                    axios.post(`${aiServiceUrl}/analyze`, { transcript: text }),
+                    axios.post(`${aiServiceUrl}/vectorize`, {
                         transcript_id: transcriptRecord.id.toString(),
                         filename: file.originalname,
                         content: text
@@ -254,7 +255,7 @@ app.post('/api/chat', requireAuth, async (req, res) => {
             return res.status(400).json({ message: "No transcripts found for the given meeting or transcript ID." });
         }
 
-        const response = await axios.post('http://localhost:8000/chat', {
+        const response = await axios.post(`${aiServiceUrl}/chat`, {
             transcript_ids: targetIds,
             question: question
         });

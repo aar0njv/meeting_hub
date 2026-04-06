@@ -41,9 +41,9 @@ function UploadPage({ session, onUploadSuccess }) {
         },
         body: JSON.stringify({ title: newMeetingTitle, date: newMeetingDate })
       });
-      
+
       const data = await res.json();
-      
+
       if (res.ok) {
         setMeetings([data, ...meetings]);
         setSelectedMeetingId(data.id);
@@ -63,10 +63,10 @@ function UploadPage({ session, onUploadSuccess }) {
   return (
     <div className="upload-page-container">
       <h1 className="page-title">Upload Transcripts</h1>
-      <p className="text-muted upload-subtitle">Group your transcripts by project or meeting.</p>
-      
+      <p className="text-muted upload-subtitle">Group your transcripts by project.</p>
+
       <div className="meeting-selector-card">
-        <div className="meeting-header">Assign Transcripts to Meeting</div>
+        <div className="meeting-header">Assign Transcripts to Project</div>
         {isCreating ? (
           <form onSubmit={handleCreateMeeting} className="meeting-form-row">
             <div className="form-group meeting-form-group">
@@ -84,16 +84,16 @@ function UploadPage({ session, onUploadSuccess }) {
           </form>
         ) : (
           <div className="meeting-form-row">
-             <div className="form-group meeting-form-group">
-               <label>Select existing Meeting</label>
-               <select className="form-control" value={selectedMeetingId} onChange={e => setSelectedMeetingId(e.target.value)}>
-                 {meetings.length === 0 && <option value="" disabled>No meetings found (Create one!)</option>}
-                 {meetings.map(m => (
-                   <option key={m.id} value={m.id}>{m.title} ({m.date})</option>
-                 ))}
-               </select>
-             </div>
-             <button className="btn btn-primary" onClick={() => setIsCreating(true)}>+ New Meeting Group</button>
+            <div className="form-group meeting-form-group">
+              <label>Select existing Meeting</label>
+              <select className="form-control" value={selectedMeetingId} onChange={e => setSelectedMeetingId(e.target.value)}>
+                {meetings.length === 0 && <option value="" disabled>No meetings found (Create one!)</option>}
+                {meetings.map(m => (
+                  <option key={m.id} value={m.id}>{m.title} ({m.date})</option>
+                ))}
+              </select>
+            </div>
+            <button className="btn btn-primary" onClick={() => setIsCreating(true)}>+ New Meeting Group</button>
           </div>
         )}
       </div>
