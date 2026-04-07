@@ -90,7 +90,6 @@ python -m venv .venv
 # PowerShell: .\.venv\Scripts\Activate.ps1
 # Mac/Linux: source .venv/bin/activate
 
-pip install -r requirements.txt
 python main.py
 ```
 

@@ -110,15 +110,19 @@ async def chat_transcript(req: ChatRequest):
     sources = []
     
     if req.transcript_content:
-        context_text = req.transcript_content
+        context_text = f"Source: Current Transcript\nContent: {req.transcript_content}"
         sources = ["Current Transcript"]
     else:
         search_results = search_vector_db(query=req.question, n_results=5, transcript_ids=req.transcript_ids)
         if search_results['documents'] and len(search_results['documents'][0]) > 0:
-            context_text = "\n\n".join(search_results['documents'][0])
+            context_pieces = []
+            for doc, meta in zip(search_results['documents'][0], search_results['metadatas'][0]):
+                filename = meta.get('filename', 'Unknown Source')
+                context_pieces.append(f"Source: {filename}\nContent:\n{doc}")
+            context_text = "\n\n---\n\n".join(context_pieces)
             sources = list(set(search_results['metadatas'][0][i]['filename'] for i in range(len(search_results['metadatas'][0]))))
 
-    system_prompt = f"Answer based ONLY on this context: {context_text}. If unknown, say so."
+    system_prompt = f"You are a helpful AI assistant. Answer the user's question based ONLY on the following context. In your response, you MUST explicitly cite the 'Source' (e.g., file name) from which you obtained the information. If you cannot find the answer in the context, say so.\n\nContext:\n{context_text}"
     
     try:
         answer = call_gemini(system_prompt, req.question, force_json=False)
