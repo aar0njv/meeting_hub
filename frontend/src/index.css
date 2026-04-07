@@ -78,13 +78,20 @@ body {
   line-height: 1.1;
   font-weight: 800;
   letter-spacing: -0.025em;
-  color: #ffffff;
+  margin-bottom: 1.5rem;
+}
+
+.hero-title h1 {
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.025em;
   margin-bottom: 1.5rem;
 }
 
 .hero-highlight {
-  color: orange;
   font-style: italic;
+  color: var(--primary-color);
 }
 
 /* Responsive adjustment for larger screens (LG breakpoint) */
@@ -964,11 +971,12 @@ h4 {
 .auth-info-side h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  background: var(--primary-gradient);
+  background: var(--text-main);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
 
 .auth-info-side p {
   font-size: 1.1rem;

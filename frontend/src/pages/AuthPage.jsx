@@ -34,10 +34,10 @@ function AuthPage() {
     <div className="auth-page-container">
       <div className="auth-split-wrapper">
         <div className="auth-info-side">
-          <h1 className="hero-title">
-            Intelligence in every <br />
-            <span className="hero-highlight">transcript.</span>
-          </h1>
+          <div className="hero-title">
+            Intelligence in every
+            <span className="hero-highlight"> transcript.</span>
+          </div>
           <p>Transform your meetings into actionable insights. Upload transcripts, track decisions, and analyze speaker sentiment instantly.</p>
 
           <div className="auth-features">
