@@ -8,6 +8,11 @@
   [![Supabase Database](https://img.shields.io/badge/Database-Supabase-green?style=for-the-badge&logo=supabase)](#)
 </div>
 
+
+- [Video of Demo](https://drive.google.com/file/d/1CidxsgkGxx6YBw8tF-lD4FcOFEbvDInm/view?usp=drive_link)
+- [Design Document](https://docs.google.com/document/d/1yfJnLFGpExFHht5ivm_GveY_hdl97yt9jrKXkpeo4Us/edit?usp=drive_link)
+
+
 ## The Problem
 
 Teams often waste valuable hours after meetings manually summarizing discussions, assigning action items, and scrolling endlessly through raw transcripts to find past decisions. Traditional meeting notes lack context, and searching for specific insights is slow and inefficient. Teams need a centralized, automated way to extract actionable intelligence from meeting text instantly.

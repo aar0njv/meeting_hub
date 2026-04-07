@@ -35,8 +35,8 @@ function AuthPage() {
       <div className="auth-split-wrapper">
         <div className="auth-info-side">
           <div className="hero-title">
-            Intelligence in every
-            <span className="hero-highlight"> transcript.</span>
+            Analyze with
+            <span className="hero-highlight"><br />intelligence.</span>
           </div>
           <p>Transform your meetings into actionable insights. Upload transcripts, track decisions, and analyze speaker sentiment instantly.</p>
 
@@ -117,12 +117,14 @@ function AuthPage() {
         </div>
       </div>
 
-      {error && (
-        <div className="toast-popup error-toast">
-          {error}
-        </div>
-      )}
-    </div>
+      {
+        error && (
+          <div className="toast-popup error-toast">
+            {error}
+          </div>
+        )
+      }
+    </div >
   );
 }
 
