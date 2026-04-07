@@ -705,7 +705,7 @@ h4 {
   display: flex;
   gap: 10px;
   align-items: center;
-  color: var(--text-muted);
+  color: rgb(209, 209, 209);
 }
 
 .dot {
@@ -716,11 +716,11 @@ h4 {
 }
 
 .dot.high {
-  background: #06ff00;
+  background: #45b543ff;
 }
 
 .dot.neutral {
-  background: #ffe400;
+  background: #a7a7a7ff;
 }
 
 .dot.low {

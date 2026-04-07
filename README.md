@@ -4,7 +4,6 @@
 
   [![Docker Compose](https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge&logo=docker)](#)
   [![React.js](https://img.shields.io/badge/Frontend-React_Vite-yellow?style=for-the-badge&logo=react)](#)
-  [![Node.js](https://img.shields.io/badge/Backend-Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](#)
   [![Express.js](https://img.shields.io/badge/Framework-Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](#)
   [![Supabase Database](https://img.shields.io/badge/Database-Supabase-green?style=for-the-badge&logo=supabase)](#)
 </div>

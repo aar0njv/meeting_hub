@@ -2,8 +2,8 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const COLORS = {
-    high: '#029500ff',    // green
-    neutral: '#d5c424ff', // yellow
+    high: '#45b543ff',    // green
+    neutral: '#a7a7a7ff', // yellow
     low: '#c72516ff'      // Red
 };
 
