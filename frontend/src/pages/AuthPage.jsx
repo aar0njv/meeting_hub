@@ -34,7 +34,10 @@ function AuthPage() {
     <div className="auth-page-container">
       <div className="auth-split-wrapper">
         <div className="auth-info-side">
-          <h2 style={{ color: '#f39c12' }}>Meeting Intelligence Hub</h2>
+          <h1 className="hero-title">
+            Intelligence in every <br />
+            <span className="hero-highlight">transcript.</span>
+          </h1>
           <p>Transform your meetings into actionable insights. Upload transcripts, track decisions, and analyze speaker sentiment instantly.</p>
 
           <div className="auth-features">
@@ -113,7 +116,7 @@ function AuthPage() {
           </div>
         </div>
       </div>
-      
+
       {error && (
         <div className="toast-popup error-toast">
           {error}

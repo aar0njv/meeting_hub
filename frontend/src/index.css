@@ -73,6 +73,27 @@ body {
   border-bottom-color: var(--primary-color);
 }
 
+.hero-title {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+}
+
+.hero-highlight {
+  color: orange;
+  font-style: italic;
+}
+
+/* Responsive adjustment for larger screens (LG breakpoint) */
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+}
+
 .app-content {
   flex: 1;
   display: flex;

@@ -57,7 +57,7 @@ export const exportTranscriptSummary = (meetingTitle, transcriptTitle, analysisR
         head: [tableColumn],
         body: tableRows,
         theme: "grid",
-        headStyles: { fillColor: [63, 81, 181] },
+        headStyles: { fillColor: [243, 156, 18] },
         columnStyles: {
             1: { cellWidth: 90 },
         },

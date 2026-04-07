@@ -49,13 +49,13 @@ def call_gemini(system_prompt: str, user_text: str, force_json: bool = True):
         res = requests.post(GEMINI_URL, headers=headers, json=payload)
         
         if res.status_code != 200:
-            print(f"❌ Google API Error {res.status_code}: {res.text}")
+            print(f" Google API Error {res.status_code}: {res.text}")
             res.raise_for_status()
 
         data = res.json()
 
         if 'candidates' not in data or 'content' not in data['candidates'][0]:
-            print(f"⚠️ No content in response: {data}")
+            print(f" No content in response: {data}")
             return {} if force_json else "No response."
 
         raw_content = data['candidates'][0]['content']['parts'][0]['text'].strip()
@@ -66,7 +66,7 @@ def call_gemini(system_prompt: str, user_text: str, force_json: bool = True):
             try:
                 return json.loads(cleaned_json)
             except json.JSONDecodeError as e:
-                print(f"❌ JSON Parse Error: {e}\nRaw content: {raw_content}")
+                print(f" JSON Parse Error: {e}\nRaw content: {raw_content}")
                 raise HTTPException(status_code=500, detail="Malformed JSON from AI")
         
         return raw_content
