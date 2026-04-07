@@ -4,7 +4,7 @@ import autoTable from "jspdf-autotable";
 
 export const exportTranscriptSummary = (meetingTitle, transcriptTitle, analysisResults) => {
     const doc = new jsPDF();
-    const { decisions, action_items, sentiment, focus_score } = analysisResults;
+    const { decisions = [], action_items = [], sentiment = "N/A", focus_score = 0 } = analysisResults;
 
     doc.setFontSize(20);
     doc.text("Meeting Summary", 14, 22);
@@ -20,12 +20,29 @@ export const exportTranscriptSummary = (meetingTitle, transcriptTitle, analysisR
 
     doc.setFontSize(11);
     let decisionY = 62;
+    const margin = 14;
+    const maxWidth = 180;
+    const lineHeight = 7;
 
     const safeDecisions = decisions || [];
     safeDecisions.forEach((decision, index) => {
-        doc.text(`${index + 1}. ${decision}`, 14, decisionY);
-        decisionY += 7;
+        const text = `${index + 1}. ${decision}`;
+
+        const lines = doc.splitTextToSize(text, maxWidth);
+
+        if (decisionY + lines.length * lineHeight > 280) {
+            doc.addPage();
+            decisionY = 20;
+        }
+
+        doc.text(lines, margin, decisionY);
+        decisionY += (lines.length * lineHeight);
     });
+
+    if (decisionY + 20 > 280) {
+        doc.addPage();
+        decisionY = 20;
+    }
 
     doc.setFontSize(16);
     doc.text("Action Items", 14, decisionY + 10);
@@ -41,6 +58,10 @@ export const exportTranscriptSummary = (meetingTitle, transcriptTitle, analysisR
         body: tableRows,
         theme: "grid",
         headStyles: { fillColor: [63, 81, 181] },
+        columnStyles: {
+            1: { cellWidth: 90 },
+        },
+        styles: { overflow: 'linebreak' },
     });
 
     const safeMeeting = meetingTitle.replace(/\s+/g, '_');
