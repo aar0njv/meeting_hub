@@ -22,7 +22,6 @@ Teams often waste valuable hours after meetings manually summarizing discussions
 
 The application features a sleek React dashboard, a Node.js API layer for database interactions and file routing, and a dedicated Python FastAPI vector microservice for AI processing.
 
-- [Video of Demo](https://drive.google.com/file/d/1CidxsgkGxx6YBw8tF-lD4FcOFEbvDInm/view?usp=drive_link)
 - [Design Document](https://docs.google.com/document/d/1yfJnLFGpExFHht5ivm_GveY_hdl97yt9jrKXkpeo4Us/edit?usp=drive_link)
 
 
